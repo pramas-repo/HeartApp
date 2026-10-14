@@ -1,0 +1,181 @@
+
+{% extends "base.html" %}
+
+{% block heading %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="welcome-banner">
+    <div>
+        <span class="eyebrow">MACHINE LEARNING OVERVIEW</span>
+        <h2>Heart health insights, at a glance.</h2>
+        <p>
+            Explore your dataset, compare ML algorithms,
+            and run an experimental KNN prediction.
+        </p>
+        <a href="/predict" class="btn btn-light">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Open Prediction Tool
+        </a>
+    </div>
+    <i class="fa-solid fa-heart-pulse banner-heart"></i>
+</div>
+
+<div class="section-heading">
+    <h3>Project Snapshot</h3>
+    <p>Dataset and model status</p>
+</div>
+
+<div class="row g-3">
+    <div class="col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <i class="fa-solid fa-table-cells-large metric-icon"></i>
+            <p>Dataset Records</p>
+            <h2>{{ stats.records }}</h2>
+            <small>Rows in heart.csv</small>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <i class="fa-solid fa-list-check metric-icon purple"></i>
+            <p>Input Features</p>
+            <h2>{{ stats.features }}</h2>
+            <small>Excluding target</small>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <i class="fa-solid fa-triangle-exclamation metric-icon orange"></i>
+            <p>Missing Values</p>
+            <h2>{{ stats.missing }}</h2>
+            <small>Across all columns</small>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <i class="fa-solid fa-microchip metric-icon green"></i>
+            <p>KNN Model</p>
+            <h2 class="status-text">
+                {{ 'Ready' if model_ready else 'Setup needed' }}
+            </h2>
+            <small>Model and scaler status</small>
+        </div>
+    </div>
+</div>
+
+<div class="section-heading">
+    <h3>Dataset Analytics</h3>
+    <p>Interactive visualizations</p>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="panel-card">
+            <h4>Target Distribution</h4>
+            <p class="muted">Records by target class</p>
+            <div class="chart-container">
+                <canvas id="targetChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="panel-card">
+            <h4>Feature Averages</h4>
+            <p class="muted">Mean values of numeric features</p>
+            <div class="chart-container">
+                <canvas id="featureChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section-heading">
+    <h3>Saved Model Graphics</h3>
+    <a href="/models" class="view-link">
+        View all models <i class="fa-solid fa-arrow-right"></i>
+    </a>
+</div>
+
+<div class="row g-3">
+    {% for image in images %}
+    <div class="col-md-6 col-xl-4">
+        <div class="graph-card">
+            <h5>{{ image.title }}</h5>
+            <img
+                src="{{ url_for('static',
+                      filename='images/' + image.file) }}"
+                alt="{{ image.title }}">
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="panel-card">
+            No saved graphs found. Run your Python training pipeline
+            to generate the images.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const distribution = {{ distribution | tojson }};
+const featureLabels = {{ feature_labels | tojson }};
+const featureMeans = {{ feature_means | tojson }};
+
+if (distribution.values.length) {
+    new Chart(document.getElementById("targetChart"), {
+        type: "doughnut",
+        data: {
+            labels: distribution.labels.map(
+                value => "Target " + value
+            ),
+            datasets: [{
+                data: distribution.values,
+                backgroundColor: ["#4169e1", "#22b89a"],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            cutout: "65%",
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            }
+        }
+    });
+}
+
+if (featureLabels.length) {
+    new Chart(document.getElementById("featureChart"), {
+        type: "bar",
+        data: {
+            labels: featureLabels,
+            datasets: [{
+                label: "Mean value",
+                data: featureMeans,
+                backgroundColor: "#6c83ed",
+                borderRadius: 6
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

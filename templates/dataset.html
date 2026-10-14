@@ -1,0 +1,83 @@
+
+{% extends "base.html" %}
+
+{% block heading %}Dataset Explorer{% endblock %}
+
+{% block content %}
+
+<div class="section-heading">
+    <div>
+        <h3>Dataset Preview</h3>
+        <p>First 15 records from heart.csv</p>
+    </div>
+
+    {% if shape %}
+    <span class="soft-badge">
+        {{ shape[0] }} rows × {{ shape[1] }} columns
+    </span>
+    {% endif %}
+</div>
+
+{% if rows %}
+<div class="panel-card">
+    <div class="table-responsive">
+        <table class="table table-hover data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    {% for col in columns %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    {% for col in columns %}
+                    <td>{{ row[col] }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="section-heading">
+    <h3>Missing Value Audit</h3>
+</div>
+
+<div class="panel-card">
+    <table class="table data-table">
+        <thead>
+            <tr>
+                <th>Column</th>
+                <th>Missing Values</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for col, count in missing.items() %}
+            <tr>
+                <td>{{ col }}</td>
+                <td>{{ count }}</td>
+                <td>
+                    {% if count == 0 %}
+                    <span class="badge text-bg-success">Complete</span>
+                    {% else %}
+                    <span class="badge text-bg-warning">Review</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="panel-card">
+    Dataset unavailable. Place heart.csv beside app.py.
+</div>
+{% endif %}
+
+{% endblock %}

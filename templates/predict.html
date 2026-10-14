@@ -1,0 +1,97 @@
+
+{% extends "base.html" %}
+
+{% block heading %}Heart Prediction{% endblock %}
+
+{% block content %}
+
+<div class="panel-card mb-4">
+    <div class="prediction-heading">
+        <i class="fa-solid fa-heart-pulse"></i>
+        <div>
+            <h3>KNN Prediction Workspace</h3>
+            <p class="muted">
+                Enter feature values using the same units as your dataset.
+            </p>
+        </div>
+    </div>
+
+    {% if not model_ready %}
+    <div class="alert alert-warning">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        Prediction requires both knn.pkl and scaler.pkl.
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    {% if prediction %}
+    <div class="prediction-result
+        {{ 'positive' if prediction.positive else 'negative' }}">
+        <h4>
+            <i class="fa-solid
+                {{ 'fa-triangle-exclamation' if prediction.positive
+                   else 'fa-circle-check' }}"></i>
+            {{ prediction.label }}
+        </h4>
+        <p>Model output class: {{ prediction.class }}</p>
+        <small>
+            This classification is not a medical diagnosis.
+        </small>
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        <div class="row g-3">
+            {% for feature in features %}
+            <div class="col-md-6 col-xl-4">
+                <label class="form-label"
+                       for="{{ feature.name }}">
+                    {{ feature.name | replace('_', ' ') | title }}
+                </label>
+
+                <input class="form-control"
+                       type="number"
+                       step="any"
+                       name="{{ feature.name }}"
+                       id="{{ feature.name }}"
+                       min="{{ feature.min }}"
+                       max="{{ feature.max }}"
+                       value="{{ values.get(feature.name,
+                                             feature.median) }}"
+                       required>
+
+                <small class="muted">
+                    Dataset range: {{ feature.min }} – {{ feature.max }}
+                </small>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-4">
+            <button type="submit"
+                    class="btn btn-primary"
+                    {% if not model_ready %}disabled{% endif %}>
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                Run KNN Prediction
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="notice-box">
+    <i class="fa-solid fa-user-shield"></i>
+    <div>
+        <strong>Medical disclaimer</strong>
+        <p>
+            This application is intended for education and demonstration.
+            It is not clinically validated and must not be used to diagnose
+            disease or guide treatment. Consult a qualified medical
+            professional for health concerns.
+        </p>
+    </div>
+</div>
+
+{% endblock %}
