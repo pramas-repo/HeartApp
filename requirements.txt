@@ -1,8 +1,7 @@
+Flask
 numpy
 pandas
-matplotlib
-seaborn
-flask
 scikit-learn
-os
 gunicorn
+setuptools
+wheel
